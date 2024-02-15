@@ -2,6 +2,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <arpa/inet.h>
+#include <stdio.h>
 
 int create_server(int port){
 
@@ -35,4 +37,6 @@ int accept_connection(int server_socket){
 		return client_socket;
 	}
 
+	printf("Nouvelle connexion : %s\n", inet_ntoa(client_addr.sin_addr));
+	return 0;
 }
