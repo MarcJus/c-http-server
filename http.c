@@ -13,6 +13,17 @@ int parse_http_request(char *buffer, size_t size, int client_socket){
 	} else {
 		printf("%s\n", request_line);
 	}
+
+	char *path = strtok(request_line, " ");
+	while(path != NULL && !strstr(path, "/")){
+		path = strtok(NULL, " ");
+	}
+
+	if(path == NULL)
+		return -1;
+
+	printf("%s\n", path);
+
 	return 0;
 }
 
