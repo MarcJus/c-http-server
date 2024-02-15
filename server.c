@@ -18,6 +18,12 @@ int create_server(int port){
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = INADDR_ANY;
 
+	int enable = 1;
+	ret = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
+	if(ret < 0){
+		return ret;
+	}
+
 	ret = bind(server_socket, (struct sockaddr*)&addr, sizeof(addr));
 	if(ret < 0)
 		return ret;
