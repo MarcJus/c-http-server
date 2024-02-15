@@ -4,6 +4,9 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <limits.h>
+#ifdef __linux__
+#include <linux/limits.h>
+#endif
 
 #include "http.h"
 
