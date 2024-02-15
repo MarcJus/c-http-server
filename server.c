@@ -1,6 +1,7 @@
 #include "server.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <unistd.h>
 
 int create_server(int port){
 
@@ -22,4 +23,16 @@ int create_server(int port){
 	ret = listen(server_socket, 1);
 
 	return 0;
+}
+
+int accept_connection(int server_socket){
+	int client_socket;
+	struct sockaddr_in client_addr;
+	socklen_t socklen = sizeof(client_addr);
+
+	client_socket = accept(server_socket, (struct sockaddr*)&client_addr, &socklen);
+	if(client_socket < 0){
+		return client_socket;
+	}
+
 }
