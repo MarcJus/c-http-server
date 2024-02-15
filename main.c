@@ -17,7 +17,13 @@ int main(int argc, char const *argv[]){
 		return EXIT_FAILURE;
 	}
 
-	
-	
+	while(1){
+		ret = accept_connection(server_socket);
+		if(ret < 0){
+			perror("Une erreur s'est produite lors de la connexion");
+			return EXIT_FAILURE;
+		}
+	}
+
 	return 0;
 }
