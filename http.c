@@ -6,21 +6,18 @@
 
 #include "http.h"
 
-int parse_http_request(char *buffer, size_t size, int client_socket){
-	char *request_line = strtok(buffer, "\n");
-	if(request_line == NULL){
+int parse_http_request(const char *buffer, size_t buffer_size, int client_socket){
+	const char *start_of_path = strchr(buffer, ' ') + 1;
+	const char *end_of_path = strchr(start_of_path, ' ');
+
+	size_t path_len = end_of_path - start_of_path;
+	char *path = malloc(sizeof(path_len));
+	if(path == NULL){
 		return -1;
-	} else {
-		printf("%s\n", request_line);
 	}
 
-	char *path = strtok(request_line, " ");
-	while(path != NULL && !strstr(path, "/")){
-		path = strtok(NULL, " ");
-	}
-
-	if(path == NULL)
-		return -1;
+	strncpy(path, start_of_path, path_len);
+	path[sizeof(path)] = 0;
 
 	printf("%s\n", path);
 
