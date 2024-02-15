@@ -1,9 +1,11 @@
-#include "server.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+
+#include "server.h"
+#include "http.h"
 
 int create_server(int port){
 
@@ -35,6 +37,7 @@ int create_server(int port){
 
 int accept_connection(int server_socket){
 	int client_socket;
+	int ret;
 	struct sockaddr_in client_addr;
 	socklen_t socklen = sizeof(client_addr);
 
@@ -44,5 +47,10 @@ int accept_connection(int server_socket){
 	}
 
 	printf("Nouvelle connexion : %s\n", inet_ntoa(client_addr.sin_addr));
+
+	ret = read_http_request(client_socket);
+	if(ret < 0){
+		return ret;
+	}
 	return 0;
 }
