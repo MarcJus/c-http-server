@@ -12,7 +12,7 @@ int read_http_request(int client_socket){
 		if(buffer == NULL){
 			return -1;
 		}
-		ssize_t bytes_read = recv(client_socket, &buffer, 255, 0);
+		ssize_t bytes_read = recv(client_socket, buffer, 255, 0);
 		if(bytes_read < 0){
 			return -1;
 		} else if (bytes_read == 0){
