@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <limits.h>
 
 #include "http.h"
 
@@ -20,6 +21,14 @@ int parse_http_request(const char *buffer, size_t buffer_size, int client_socket
 	path[sizeof(path)] = 0;
 
 	printf("%s\n", path);
+
+	char actual_path[PATH_MAX];
+	if(getcwd(actual_path, PATH_MAX) != NULL){
+		printf("%s\n", actual_path);
+	}
+
+	strncat(actual_path, path, PATH_MAX);
+	printf("actual path : %s\n", actual_path);
 
 	return 0;
 }
