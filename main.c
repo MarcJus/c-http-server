@@ -8,10 +8,11 @@
 int main(int argc, char const *argv[]){
 
 	int ret;
+	int server_socket;
 	printf("Création du serveur HTTP en cours...\n");
 
-	ret = create_server(80);
-	if(ret < 0){
+	server_socket = create_server(80);
+	if(server_socket < 0){
 		perror("Erreur lors de la création du serveur");
 		return EXIT_FAILURE;
 	}
