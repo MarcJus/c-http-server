@@ -22,7 +22,7 @@ int create_server(int port){
 	
 	ret = listen(server_socket, 1);
 
-	return 0;
+	return server_socket;
 }
 
 int accept_connection(int server_socket){
