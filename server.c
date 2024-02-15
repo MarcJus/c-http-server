@@ -1,5 +1,5 @@
 #include "server.h"
 
-int create_server_socket(int port){
+int create_server(int port){
 	return 0;
 }
