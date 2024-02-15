@@ -21,7 +21,7 @@ int parse_http_request(const char *buffer, size_t buffer_size, int client_socket
 	}
 
 	strncpy(path, start_of_path, path_len);
-	path[sizeof(path)] = 0;
+	path[strlen(path)] = 0;
 
 	printf("%s\n", path);
 
@@ -33,6 +33,7 @@ int parse_http_request(const char *buffer, size_t buffer_size, int client_socket
 	strncat(actual_path, path, PATH_MAX);
 	printf("actual path : %s\n", actual_path);
 
+	free(path);
 	return 0;
 }
 
