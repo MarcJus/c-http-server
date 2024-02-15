@@ -6,6 +6,10 @@
 
 #include "http.h"
 
+int parse_http_request(const char *buffer, size_t size, int client_socket){
+	
+}
+
 int read_http_request(int client_socket){
 	while(1){
 		char *buffer = malloc(1024);
@@ -21,6 +25,8 @@ int read_http_request(int client_socket){
 		} else {
 			printf("%s", buffer);
 		}
+
+		parse_http_socket(buffer, strlen(buffer), client_socket);
 
 	}
 
