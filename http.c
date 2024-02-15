@@ -6,8 +6,14 @@
 
 #include "http.h"
 
-int parse_http_request(const char *buffer, size_t size, int client_socket){
-	
+int parse_http_request(char *buffer, size_t size, int client_socket){
+	char *request_line = strtok(buffer, "\n");
+	if(request_line == NULL){
+		return -1;
+	} else {
+		printf("%s\n", request_line);
+	}
+	return 0;
 }
 
 int read_http_request(int client_socket){
@@ -26,7 +32,7 @@ int read_http_request(int client_socket){
 			printf("%s", buffer);
 		}
 
-		parse_http_socket(buffer, strlen(buffer), client_socket);
+		parse_http_request(buffer, strlen(buffer), client_socket);
 
 	}
 
