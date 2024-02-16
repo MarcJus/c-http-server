@@ -33,7 +33,7 @@ int send_file(int client_socket, const char *file_name){
 	if(response == NULL){
 		return -1;
 	}
-	size_t *reponse_len = 0;
+	size_t response_len = 0;
 
 	bzero(response, HTTP_BUFFER_SIZE);
 
@@ -46,6 +46,24 @@ int send_file(int client_socket, const char *file_name){
 		}
 		return -1;
 	}
+
+	struct stat file_stat;
+	fstat(file_fd, &file_stat);
+	off_t file_size = file_stat.st_size;
+
+	memcpy(response, HTTP_200_RESPONSE_BASE, sizeof(HTTP_200_RESPONSE_BASE) - 1);
+	response_len += sizeof(HTTP_200_RESPONSE_BASE) - 1;
+
+	ssize_t bytes_read = read(file_fd, response + response_len, HTTP_BUFFER_SIZE - response_len);
+	if(bytes_read < 0){
+		perror("read");
+		free(response);
+		return -1;
+	}
+
+	response_len += bytes_read;
+
+	send(client_socket, response, response_len, 0);
 
 	free(response);
 	return ret;
