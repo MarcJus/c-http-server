@@ -21,7 +21,8 @@ int parse_http_request(char *buffer, size_t buffer_size, int client_socket){
 		buffer[matches[1].rm_eo] = '\0';
 		const char *file_name = buffer + matches[1].rm_so;
 	}
-	
+
+	regfree(&regex);
 	return 0;
 }
 
