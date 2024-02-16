@@ -52,5 +52,6 @@ int accept_connection(int server_socket){
 	if(ret < 0){
 		return ret;
 	}
+	close(client_socket);
 	return 0;
 }
