@@ -88,12 +88,9 @@ int read_http_request(int client_socket){
 	ssize_t bytes_read = recv(client_socket, buffer, HTTP_BUFFER_SIZE - 1, 0);
 	if(bytes_read < 0){
 		perror("Impossible de recevoir les données");
-	} else if (bytes_read == 0){
-		close(client_socket);
-	} else {
+	} else if(bytes_read > 0) {
 		printf("%s", buffer);
 		parse_http_request(buffer, strlen(buffer), client_socket);
-		close(client_socket);
 	}
 
 	free(buffer);
