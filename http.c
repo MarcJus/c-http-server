@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 
 #include "http.h"
+#include "file.h"
 
 #define HTTP_200_RESPONSE_BASE 	"HTTP/1.1 200 OK\r\n"\
 							   	"Content-Type: text/html\r\n"\
@@ -19,7 +20,7 @@
 
 int send_file(int client_socket, const char *file_name){
 	int ret;
-	int file_fd = open(file_name, O_RDONLY);
+	int file_fd = open_file(file_name);
 	if(file_fd < 0){
 		perror("Impossible d'ouvrir le fichier");
 		return -1;
