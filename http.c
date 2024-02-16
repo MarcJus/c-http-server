@@ -14,6 +14,8 @@
 #include "http.h"
 #include "file.h"
 
+#define HTTP_BUFFER_SIZE	2048
+
 #define HTTP_200_RESPONSE_BASE 	"HTTP/1.1 200 OK\r\n"\
 							   	"Content-Type: text/html\r\n"\
 							   	"\r\n"
@@ -78,24 +80,22 @@ int parse_http_request(char *buffer, size_t buffer_size, int client_socket){
 }
 
 int read_http_request(int client_socket){
-	while(1){
-		char *buffer = malloc(1024);
-		if(buffer == NULL){
-			return -1;
-		}
-		bzero(buffer, 1024);
-		ssize_t bytes_read = recv(client_socket, buffer, 1023, 0);
-		if(bytes_read < 0){
-			return -1;
-		} else if (bytes_read == 0){
-			break;
-		} else {
-			printf("%s", buffer);
-		}
-
+	char *buffer = malloc(HTTP_BUFFER_SIZE);
+	if(buffer == NULL){
+		return -1;
+	}
+	bzero(buffer, HTTP_BUFFER_SIZE);
+	ssize_t bytes_read = recv(client_socket, buffer, HTTP_BUFFER_SIZE - 1, 0);
+	if(bytes_read < 0){
+		perror("Impossible de recevoir les données");
+	} else if (bytes_read == 0){
+		close(client_socket);
+	} else {
+		printf("%s", buffer);
 		parse_http_request(buffer, strlen(buffer), client_socket);
-
+		close(client_socket);
 	}
 
-	return 0;
+	free(buffer);
+	return bytes_read;
 }
