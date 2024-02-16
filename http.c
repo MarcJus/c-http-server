@@ -10,6 +10,7 @@
 #include <regex.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #include "http.h"
 #include "file.h"
@@ -20,19 +21,31 @@
 							   	"Content-Type: text/html\r\n"\
 							   	"\r\n"
 
+#define HTTP_404_RESPONSE		"HTTP/1.1 404 Not Found\r\n"\
+								"Content-Type: text/plain\r\n"\
+								"\r\n"\
+								"Not Found\r\n"
+
 int send_file(int client_socket, const char *file_name){
 	int ret;
-	int file_fd = open_file(file_name);
-	if(file_fd < 0){
-		perror("Impossible d'ouvrir le fichier");
-		return -1;
-	}
 
 	char *response = malloc(HTTP_BUFFER_SIZE);
-	if(*response == NULL){
+	if(response == NULL){
 		return -1;
 	}
 	size_t *reponse_len = 0;
+
+	bzero(response, HTTP_BUFFER_SIZE);
+
+	int file_fd = open_file(file_name);
+	if(file_fd < 0){
+		perror("Impossible d'ouvrir le fichier");
+		if(errno == ENOENT){
+			snprintf(response, HTTP_BUFFER_SIZE, HTTP_404_RESPONSE);
+			send(client_socket, response, strlen(response), 0);
+		}
+		return -1;
+	}
 
 	free(response);
 	return ret;
