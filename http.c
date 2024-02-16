@@ -17,11 +17,12 @@ int parse_http_request(char *buffer, size_t buffer_size, int client_socket){
 	regcomp(&regex, "^GET /([^ ]*) HTTP/([^ ]*)", REG_EXTENDED);
 	regmatch_t matches[2];
 
-	if(regexec(&regex, buffer, 3, matches, 0) == 0){
+	if(regexec(&regex, buffer, 2, matches, 0) == 0){
 		buffer[matches[1].rm_eo] = '\0';
 		const char *file_name = buffer + matches[1].rm_so;
 	}
-	
+
+	regfree(&regex);
 	return 0;
 }
 
