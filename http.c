@@ -7,6 +7,7 @@
 #ifdef __linux__
 #include <linux/limits.h>
 #endif
+#include <fcntl.h>
 
 #include "http.h"
 
@@ -32,6 +33,12 @@ int parse_http_request(const char *buffer, size_t buffer_size, int client_socket
 
 	strncat(actual_path, path, PATH_MAX);
 	printf("actual path : %s\n", actual_path);
+
+	int file_fd = open(actual_path, O_RDONLY, 0);
+	if(file_fd < 0){
+		free(path);
+		return -1;
+	}
 
 	free(path);
 	return 0;
