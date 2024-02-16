@@ -28,35 +28,11 @@ int send_file(int client_socket, const char *file_name){
 		return -1;
 	}
 
-	struct stat file_stat;
-	ret = fstat(file_fd, &file_stat);
-	if(ret < 0){
-		perror("Impossible d'ouvrir les statistiques");
+	char *response = malloc(HTTP_BUFFER_SIZE);
+	if(*response == NULL){
 		return -1;
 	}
-
-	size_t file_size = file_stat.st_size;
-	size_t response_size = sizeof(HTTP_200_RESPONSE_BASE) + file_size;
-	char *response = malloc(response_size);
-	if(response == NULL){
-		return -1;
-	}
-
-	char *response_offset = response;
-	strncpy(response, HTTP_200_RESPONSE_BASE, sizeof(HTTP_200_RESPONSE_BASE) - 1);
-
-	response_offset += sizeof(HTTP_200_RESPONSE_BASE) - 1;
-	ret = read(file_fd, response_offset, file_size);
-	if(ret < 0){
-		perror("read");
-		free(response);
-		return -1;
-	}
-
-	ret = send(client_socket, response, response_size, 0);
-	if(ret < 0){
-		perror("send");
-	}
+	size_t *reponse_len = 0;
 
 	free(response);
 	return ret;
