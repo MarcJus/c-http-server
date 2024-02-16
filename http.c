@@ -56,7 +56,7 @@ int send_file(int client_socket, const char *file_name){
 
 	ssize_t bytes_read = read(file_fd, response + response_len, HTTP_BUFFER_SIZE - response_len);
 	if(bytes_read < 0){
-		perror("read");
+		perror("Impossible de lire le fichier");
 		free(response);
 		return -1;
 	}
@@ -96,7 +96,6 @@ int read_http_request(int client_socket){
 	if(bytes_read < 0){
 		perror("Impossible de recevoir les données");
 	} else if(bytes_read > 0) {
-		printf("%s", buffer);
 		parse_http_request(buffer, strlen(buffer), client_socket);
 	}
 

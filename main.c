@@ -17,7 +17,10 @@ int main(int argc, char const *argv[]){
 		return EXIT_FAILURE;
 	}
 
+	printf("Serveur créé !\n");
+
 	while(1){
+		printf("En attente d'une connexion...\n");
 		ret = accept_connection(server_socket);
 		if(ret < 0){
 			perror("Une erreur s'est produite lors de la connexion");
