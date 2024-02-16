@@ -7,40 +7,21 @@
 #ifdef __linux__
 #include <linux/limits.h>
 #endif
-#include <fcntl.h>
+#include <regex.h>
 
 #include "http.h"
 
-int parse_http_request(const char *buffer, size_t buffer_size, int client_socket){
-	const char *start_of_path = strchr(buffer, ' ') + 1;
-	const char *end_of_path = strchr(start_of_path, ' ');
+int parse_http_request(char *buffer, size_t buffer_size, int client_socket){
 
-	size_t path_len = end_of_path - start_of_path;
-	char *path = malloc(sizeof(path_len));
-	if(path == NULL){
-		return -1;
+	regex_t regex;
+	regcomp(&regex, "^GET /([^ ]*) HTTP/([^ ]*)", REG_EXTENDED);
+	regmatch_t matches[2];
+
+	if(regexec(&regex, buffer, 3, matches, 0) == 0){
+		buffer[matches[1].rm_eo] = '\0';
+		const char *file_name = buffer + matches[1].rm_so;
 	}
-
-	strncpy(path, start_of_path, path_len);
-	path[strlen(path)] = 0;
-
-	printf("%s\n", path);
-
-	char actual_path[PATH_MAX];
-	if(getcwd(actual_path, PATH_MAX) != NULL){
-		printf("%s\n", actual_path);
-	}
-
-	strncat(actual_path, path, PATH_MAX);
-	printf("actual path : %s\n", actual_path);
-
-	int file_fd = open(actual_path, O_RDONLY, 0);
-	if(file_fd < 0){
-		free(path);
-		return -1;
-	}
-
-	free(path);
+	
 	return 0;
 }
 
