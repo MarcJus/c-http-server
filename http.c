@@ -10,6 +10,7 @@
 #include <regex.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #include "http.h"
 #include "file.h"
@@ -20,43 +21,49 @@
 							   	"Content-Type: text/html\r\n"\
 							   	"\r\n"
 
+#define HTTP_404_RESPONSE		"HTTP/1.1 404 Not Found\r\n"\
+								"Content-Type: text/plain\r\n"\
+								"\r\n"\
+								"Not Found\r\n"
+
 int send_file(int client_socket, const char *file_name){
 	int ret;
+
+	char *response = malloc(HTTP_BUFFER_SIZE);
+	if(response == NULL){
+		return -1;
+	}
+	size_t response_len = 0;
+
+	bzero(response, HTTP_BUFFER_SIZE);
+
 	int file_fd = open_file(file_name);
 	if(file_fd < 0){
 		perror("Impossible d'ouvrir le fichier");
+		if(errno == ENOENT){
+			snprintf(response, HTTP_BUFFER_SIZE, HTTP_404_RESPONSE);
+			send(client_socket, response, strlen(response), 0);
+		}
 		return -1;
 	}
 
 	struct stat file_stat;
-	ret = fstat(file_fd, &file_stat);
-	if(ret < 0){
-		perror("Impossible d'ouvrir les statistiques");
-		return -1;
-	}
+	fstat(file_fd, &file_stat);
+	off_t file_size = file_stat.st_size;
 
-	size_t file_size = file_stat.st_size;
-	size_t response_size = sizeof(HTTP_200_RESPONSE_BASE) + file_size;
-	char *response = malloc(response_size);
-	if(response == NULL){
-		return -1;
-	}
+	memcpy(response, HTTP_200_RESPONSE_BASE, sizeof(HTTP_200_RESPONSE_BASE) - 1);
+	response_len += sizeof(HTTP_200_RESPONSE_BASE) - 1;
 
-	char *response_offset = response;
-	strncpy(response, HTTP_200_RESPONSE_BASE, sizeof(HTTP_200_RESPONSE_BASE) - 1);
-
-	response_offset += sizeof(HTTP_200_RESPONSE_BASE) - 1;
-	ret = read(file_fd, response_offset, file_size);
-	if(ret < 0){
+	ssize_t bytes_read = read(file_fd, response + response_len, HTTP_BUFFER_SIZE - response_len);
+	if(bytes_read < 0){
 		perror("read");
 		free(response);
 		return -1;
 	}
 
-	ret = send(client_socket, response, response_size, 0);
-	if(ret < 0){
-		perror("send");
-	}
+	response_len += bytes_read;
+
+	send(client_socket, response, response_len, 0);
 
 	free(response);
 	return ret;
