@@ -141,7 +141,6 @@ int read_http_request(int client_socket){
 		if(path == NULL){
 			return -1;
 		}
-		// parse_http_request(buffer, strlen(buffer), client_socket);
 		size_t buf_len;
 		char *response = build_response(path, &buf_len);
 		if(response == NULL){
@@ -150,6 +149,17 @@ int read_http_request(int client_socket){
 		}
 		printf("taille : %ld\n", buf_len);
 		printf("%s\n", response);
+
+		ssize_t bytes_sent = send(client_socket, response, buf_len, 0);
+		if(bytes_sent < 0){
+			perror("Erreur lors de l'envoi de la réponse");
+			free(path);
+			free(response);
+			return -1;
+		}
+		printf("Envoyé : %ld\n", bytes_sent);
+		free(path);
+		free(response);
 	}
 
 	free(buffer);
