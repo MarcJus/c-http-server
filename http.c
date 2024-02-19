@@ -70,23 +70,6 @@ int send_file(int client_socket, const char *file_name){
 	return ret;
 }
 
-int parse_http_request(char *buffer, size_t buffer_size, int client_socket){
-
-	regex_t regex;
-	regcomp(&regex, "^GET /([^ ]*) HTTP/([^ ]*)", REG_EXTENDED);
-	regmatch_t matches[2];
-
-	if(regexec(&regex, buffer, 2, matches, 0) == 0){
-		buffer[matches[1].rm_eo] = '\0';
-		const char *file_name = buffer + matches[1].rm_so;
-
-		send_file(client_socket, file_name);
-	}
-
-	regfree(&regex);
-	return 0;
-}
-
 char *build_response(const char *path, size_t *buf_len){
 	char *response = NULL;
 
