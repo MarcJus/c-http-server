@@ -18,6 +18,7 @@ int open_file(const char *file_name){
 			if(new_path == NULL){
 				return -1;
 			} else {
+				bzero(new_path, new_path_len);
 				strncpy(new_path, file_name, strlen(file_name));
 				strncat(new_path, INDEX_HTML, new_path_len);
 
