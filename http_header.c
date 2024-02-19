@@ -6,7 +6,7 @@
 #include "http_header.h"
 
 char *get_request_path(const char *request){
-	char *path;
+	char *path = NULL;
 	regex_t regex;
 	regmatch_t matches[3];
 
