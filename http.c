@@ -14,6 +14,7 @@
 
 #include "http.h"
 #include "file.h"
+#include "http_header.h"
 
 #define HTTP_BUFFER_SIZE	2048
 
@@ -86,6 +87,46 @@ int parse_http_request(char *buffer, size_t buffer_size, int client_socket){
 	return 0;
 }
 
+char *build_response(const char *path, size_t *buf_len){
+	char *response = NULL;
+
+	int file_fd = open_file(path);
+	if(file_fd < 0){
+		perror("Impossible d'ouvrir le fichier");
+		return NULL;
+	}
+
+	struct stat file_stat;
+	if(fstat(file_fd, &file_stat) < 0){
+		perror("Impossible de récupérer les statistiques");
+		return NULL;
+	}
+
+	off_t file_size = file_stat.st_size;
+	*buf_len = sizeof(HTTP_200_RESPONSE_BASE) + file_size;
+
+	response = malloc(*buf_len);
+	if(response == NULL){
+		*buf_len = 0;
+		return NULL;
+	}
+	bzero(response, *buf_len);
+
+	off_t bytes_copied = 0;
+	memcpy(response, HTTP_200_RESPONSE_BASE, sizeof(HTTP_200_RESPONSE_BASE) - 1);
+	bytes_copied += sizeof(HTTP_200_RESPONSE_BASE) - 1;
+
+	ssize_t bytes_read = read(file_fd, response + bytes_copied, file_size);
+	if(bytes_read < 0){
+		perror("Impossible de copier les données");
+		free(response);
+		*buf_len = 0;
+		return NULL;
+	}
+
+	return response;
+}
+
 int read_http_request(int client_socket){
 	char *buffer = malloc(HTTP_BUFFER_SIZE);
 	if(buffer == NULL){
@@ -96,7 +137,19 @@ int read_http_request(int client_socket){
 	if(bytes_read < 0){
 		perror("Impossible de recevoir les données");
 	} else if(bytes_read > 0) {
-		parse_http_request(buffer, strlen(buffer), client_socket);
+		char *path = get_request_path(path);
+		if(path == NULL){
+			return -1;
+		}
+		// parse_http_request(buffer, strlen(buffer), client_socket);
+		size_t buf_len;
+		char *response = build_response(path, &buf_len);
+		if(response == NULL){
+			free(path);
+			return -1;
+		}
+		// printf("taille : %ld\n", buf_len);
+		// printf("%s\n", response);
 	}
 
 	free(buffer);
