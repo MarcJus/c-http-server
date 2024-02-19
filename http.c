@@ -137,7 +137,7 @@ int read_http_request(int client_socket){
 	if(bytes_read < 0){
 		perror("Impossible de recevoir les données");
 	} else if(bytes_read > 0) {
-		char *path = get_request_path(path);
+		char *path = get_request_path(buffer);
 		if(path == NULL){
 			return -1;
 		}
@@ -148,8 +148,8 @@ int read_http_request(int client_socket){
 			free(path);
 			return -1;
 		}
-		// printf("taille : %ld\n", buf_len);
-		// printf("%s\n", response);
+		printf("taille : %ld\n", buf_len);
+		printf("%s\n", response);
 	}
 
 	free(buffer);
