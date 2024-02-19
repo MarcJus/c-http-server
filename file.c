@@ -10,6 +10,10 @@
 int open_file(const char *file_name){
 	int file_fd;
 
+	if(strcmp(file_name, "")){ // Si la requête est /
+		return open("index.html", O_RDONLY);
+	}
+
 	file_fd = open(file_name, O_RDONLY);
 	if(file_fd < 0){
 		if(errno == ENOENT){
