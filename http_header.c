@@ -20,6 +20,7 @@ char *get_request_path(const char *request){
 		memcpy(path, request + matches[2].rm_so, path_len);
 		path[path_len] = 0;
 	}
+	regfree(&regex);
 
 	return path;
 }
