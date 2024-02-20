@@ -27,49 +27,6 @@
 								"\r\n"\
 								"Not Found\r\n"
 
-int send_file(int client_socket, const char *file_name){
-	int ret;
-
-	char *response = malloc(HTTP_BUFFER_SIZE);
-	if(response == NULL){
-		return -1;
-	}
-	size_t response_len = 0;
-
-	bzero(response, HTTP_BUFFER_SIZE);
-
-	int file_fd = open_file(file_name);
-	if(file_fd < 0){
-		perror("Impossible d'ouvrir le fichier");
-		if(errno == ENOENT){
-			snprintf(response, HTTP_BUFFER_SIZE, HTTP_404_RESPONSE);
-			send(client_socket, response, strlen(response), 0);
-		}
-		return -1;
-	}
-
-	struct stat file_stat;
-	fstat(file_fd, &file_stat);
-	off_t file_size = file_stat.st_size;
-
-	memcpy(response, HTTP_200_RESPONSE_BASE, sizeof(HTTP_200_RESPONSE_BASE) - 1);
-	response_len += sizeof(HTTP_200_RESPONSE_BASE) - 1;
-
-	ssize_t bytes_read = read(file_fd, response + response_len, HTTP_BUFFER_SIZE - response_len);
-	if(bytes_read < 0){
-		perror("Impossible de lire le fichier");
-		free(response);
-		return -1;
-	}
-
-	response_len += bytes_read;
-
-	send(client_socket, response, response_len, 0);
-
-	free(response);
-	return ret;
-}
-
 char *build_response(const char *path, size_t *buf_len){
 	char *response = NULL;
 
