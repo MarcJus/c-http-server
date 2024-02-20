@@ -82,6 +82,7 @@ char *build_response(const char *path, size_t *buf_len){
 	struct stat file_stat;
 	if(fstat(file_fd, &file_stat) < 0){
 		perror("Impossible de récupérer les statistiques");
+		close(file_fd);
 		return NULL;
 	}
 
@@ -91,6 +92,7 @@ char *build_response(const char *path, size_t *buf_len){
 	response = malloc(*buf_len);
 	if(response == NULL){
 		*buf_len = 0;
+		close(file_fd);
 		return NULL;
 	}
 	bzero(response, *buf_len);
@@ -104,9 +106,11 @@ char *build_response(const char *path, size_t *buf_len){
 		perror("Impossible de copier les données");
 		free(response);
 		*buf_len = 0;
+		close(file_fd);
 		return NULL;
 	}
 
+	close(file_fd);
 	return response;
 }
 

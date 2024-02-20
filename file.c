@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <dirent.h>
+#include <unistd.h>
 
 #include "file.h"
 
@@ -27,7 +27,9 @@ int open_file(const char *file_name){
 	if(S_ISREG(fd_stat.st_mode)){
 		return fd;
 	} else {
-		return openat(fd, INDEX_HTML, O_RDONLY|O_NONBLOCK);
+		int actual_fd = openat(fd, INDEX_HTML, O_RDONLY|O_NONBLOCK);
+		close(fd);
+		return actual_fd;
 	}
 
 	return fd;
