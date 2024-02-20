@@ -5,19 +5,29 @@
 
 #include "server.h"
 
+#define DEFAULT_HTTP_PORT	80
+
 int main(int argc, char const *argv[]){
 
 	int ret;
 	int server_socket;
+	int port = DEFAULT_HTTP_PORT;
 	printf("Création du serveur HTTP en cours...\n");
+	
+	if(argc > 1){
+		port = atoi(argv[1]);
+		if(port == 0){ // erreur atoi()
+			port = DEFAULT_HTTP_PORT;
+		}
+	}
 
-	server_socket = create_server(80);
+	server_socket = create_server(port);
 	if(server_socket < 0){
 		perror("Erreur lors de la création du serveur");
 		return EXIT_FAILURE;
 	}
 
-	printf("Serveur créé !\n");
+	printf("Serveur créé sur le port %d!\n", port);
 
 	while(1){
 		printf("En attente d'une connexion...\n");

@@ -1,4 +1,4 @@
-OBJS = main.o server.o http.o file.o
+OBJS = main.o server.o http.o file.o http_header.o
 
 server: $(OBJS)
 	gcc $(OBJS) -o server
