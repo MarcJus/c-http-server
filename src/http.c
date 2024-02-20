@@ -81,7 +81,8 @@ void *read_http_request(void *arg){
 	free(arg);
 	char *buffer = malloc(HTTP_BUFFER_SIZE);
 	if(buffer == NULL){
-		return -1;
+		close(client_socket);
+		return NULL;
 	}
 	bzero(buffer, HTTP_BUFFER_SIZE);
 	ssize_t bytes_read = recv(client_socket, buffer, HTTP_BUFFER_SIZE - 1, 0);
@@ -113,6 +114,7 @@ void *read_http_request(void *arg){
 		free(response);
 	}
 
+	close(client_socket);
 	free(buffer);
 	return NULL;
 }
