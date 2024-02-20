@@ -20,7 +20,15 @@ int open_file(const char *file_name){
 	if(fd < 0){
 		return fd;
 	}
-	
+	struct stat fd_stat;
+	if(fstat(fd, &fd_stat) < 0){
+		return -1;
+	}
+	if(S_ISREG(fd_stat.st_mode)){
+		return fd;
+	} else {
+		return openat(fd, INDEX_HTML, O_RDONLY|O_NONBLOCK);
+	}
 
 	return fd;
 }
