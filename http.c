@@ -67,6 +67,7 @@ char *build_response(const char *path, size_t *buf_len){
 		return NULL;
 	}
 
+	response[*buf_len - 1] = '\n';
 	close(file_fd);
 	return response;
 }
