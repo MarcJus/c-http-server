@@ -91,13 +91,13 @@ void *read_http_request(void *arg){
 	} else if(bytes_read > 0) {
 		char *path = get_request_path(buffer);
 		if(path == NULL){
-			return NULL;
+			goto ret;
 		}
 		size_t buf_len;
 		char *response = build_response(path, &buf_len);
 		if(response == NULL){
 			free(path);
-			return NULL;
+			goto ret;
 		}
 		printf("taille : %ld\n", buf_len);
 		printf("%s\n", response);
@@ -106,14 +106,14 @@ void *read_http_request(void *arg){
 		if(bytes_sent < 0){
 			perror("Erreur lors de l'envoi de la réponse");
 			free(path);
-			free(response);
-			return NULL;
+			goto ret;
 		}
 		printf("Envoyé : %ld\n", bytes_sent);
 		free(path);
 		free(response);
 	}
 
+ret:
 	close(client_socket);
 	free(buffer);
 	return NULL;
