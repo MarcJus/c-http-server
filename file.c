@@ -12,7 +12,7 @@
 int open_file(const char *file_name){
 	int fd;
 
-	if(strcmp(file_name, "")){ // Si la requête est /
+	if(strcmp(file_name, "") == 0){ // Si la requête est /
 		return open("index.html", O_RDONLY);
 	}
 
