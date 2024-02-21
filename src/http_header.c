@@ -24,3 +24,7 @@ char *get_request_path(const char *request){
 
 	return path;
 }
+
+char *build_http_header(enum HTTP_STATUS_CODE status, size_t *buf_len){
+	return NULL;
+}

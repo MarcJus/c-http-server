@@ -1,6 +1,8 @@
 #ifndef HTTP_HEADER_H
 #define HTTP_HEADER_H
 
+#include <sys/types.h>
+
 enum HTTP_STATUS_CODE {
 	OK=200,
 	NOT_FOUND=400,
@@ -15,5 +17,7 @@ enum HTTP_STATUS_CODE {
  * @return Ressource demandée par le client
  */
 char *get_request_path(const char *request);
+
+char *build_http_header(enum HTTP_STATUS_CODE status, size_t *buf_len);
 
 #endif // HTTP_HEADER_H
