@@ -1,6 +1,12 @@
 #ifndef HTTP_HEADER_H
 #define HTTP_HEADER_H
 
+enum HTTP_STATUS_CODE {
+	OK=200,
+	NOT_FOUND=400,
+	INTERN_ERR=500
+};
+
 /**
  * @brief Renvoie une chaine de caractère contenant la ressource demandée. Doit être libéré avec free()
  * 
