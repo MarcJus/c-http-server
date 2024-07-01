@@ -33,7 +33,14 @@ char *build_response(const char *path, size_t *buf_len){
 	int file_fd = open_file(path);
 	if(file_fd < 0){
 		perror("Impossible d'ouvrir le fichier");
-		return NULL;
+		response = malloc(sizeof(HTTP_404_RESPONSE) - 1);
+		if(response == NULL)
+			return NULL;
+
+		memcpy(response, HTTP_404_RESPONSE, sizeof(HTTP_404_RESPONSE) - 1);
+		*buf_len = sizeof(HTTP_404_RESPONSE) - 1; // -1 pour enlever le \0 (il est en trop dans en http)
+
+		return response;
 	}
 
 	struct stat file_stat;
