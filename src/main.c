@@ -7,6 +7,8 @@
 
 #define DEFAULT_HTTP_PORT	80
 
+// usage : [-v] [-r root] [port]
+
 int main(int argc, char const *argv[]){
 
 	int ret;
