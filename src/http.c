@@ -84,7 +84,7 @@ void *read_http_request(void *arg){
 	int retval;
 	char *root;
 
-	printf("thread créé\n");
+	d("thread créé\n");
 	int client_socket;
 	if(arg == NULL){
 		return NULL;
@@ -113,14 +113,14 @@ void *read_http_request(void *arg){
 		if(path == NULL){
 			goto ret;
 		}
-		printf("path : /%s\n", path);
+		d("path : /%s\n", path);
 		size_t buf_len;
 		char *response = build_response(path, &buf_len);
 		if(response == NULL){
 			free(path);
 			goto ret;
 		}
-		printf("taille : %ld\n", buf_len);
+		d("taille : %ld\n", buf_len);
 
 		ssize_t bytes_sent = send(client_socket, response, buf_len, 0);
 		if(bytes_sent < 0){
@@ -128,7 +128,7 @@ void *read_http_request(void *arg){
 			free(path);
 			goto ret;
 		}
-		printf("Envoyé : %ld\n", bytes_sent);
+		d("Envoyé : %ld\n", bytes_sent);
 		free(path);
 		free(response);
 	}

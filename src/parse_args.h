@@ -37,4 +37,6 @@ char *get_string_setting(int setting_index);
 
 void free_settings();
 
+#define d(...)	if(settings_flags & FLAG_VERBOSE){ printf(__VA_ARGS__); }
+
 #endif //_PARSE_ARGS_
