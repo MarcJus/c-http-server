@@ -18,7 +18,7 @@ void print_usage(){
 	printf("usage : [-v] [-r root] [port]");
 }
 
-int parse_args(int argc, char const* argv[]){
+int parse_args(int argc, char* const* argv){
 	int optval = 0;
 	char *short_options = "r:v";
 	const struct option long_options[] = {

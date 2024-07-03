@@ -23,7 +23,7 @@ extern uint8_t settings_flags;
 #define FLAG_VERBOSE	0X1
 
 
-int parse_args(int argc, char const* argv[]);
+int parse_args(int argc, char* const* argv);
 
 void free_settings();
 
