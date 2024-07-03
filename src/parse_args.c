@@ -97,3 +97,19 @@ void free_settings(){
 		}
 	}
 }
+
+int get_int_setting(int setting_index){
+	struct server_settings setting = settings[setting_index];
+	if(setting.type != TYPE_INT)
+		return -1;
+
+	return *((int *)setting.value);
+}
+
+char *get_string_setting(int setting_index){
+	struct server_settings setting = settings[setting_index];
+	if(setting.type != TYPE_STRING)
+		return NULL;
+
+	return (char *)setting.value;
+}

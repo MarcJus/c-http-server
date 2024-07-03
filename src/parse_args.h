@@ -31,6 +31,10 @@ extern uint8_t settings_flags;
 
 int parse_args(int argc, char* const* argv);
 
+int get_int_setting(int setting_index);
+
+char *get_string_setting(int setting_index);
+
 void free_settings();
 
 #endif //_PARSE_ARGS_
