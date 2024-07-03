@@ -3,8 +3,14 @@
 
 #include <stdint.h>
 
+enum setting_type {
+	TYPE_STRING, TYPE_INT
+};
+
 struct server_settings {
 	const char *name;
+
+	enum setting_type type;
 
 	void *value;
 };
