@@ -57,5 +57,14 @@ int parse_args(int argc, char const* argv[]){
 
 	}
 
+	if(!root_flag) { // par défaut, la racine des fichiers HTML est dans le même dossier que l'executable
+		char *root = malloc(1);
+		if(root == NULL)
+			return EXIT_FAILURE;
+
+		*root = '\0';
+		settings[SETTING_ROOT].value = root;
+	}
+
 	return 0;
 }
