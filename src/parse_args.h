@@ -18,4 +18,7 @@ extern struct server_settings settings[];
 
 #define FLAG_VERBOSE	0X1
 
+
+int parse_args(int argc, char const* argv[]);
+
 #endif //_PARSE_ARGS_
