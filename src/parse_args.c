@@ -90,11 +90,10 @@ int parse_args(int argc, char* const* argv){
 
 void free_settings(){
 	int i = 0;
-	for(struct server_settings *setting = &(settings[i]); setting->name != NULL; i++){
-		if(setting->value != NULL){
-			free(setting->value);
-			setting->value = NULL;
-		}
+	while (settings[i].name != NULL){
+		free(settings[i].value);
+		(&(settings[i]))->value = NULL;
+		i++;
 	}
 }
 
