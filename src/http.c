@@ -15,6 +15,7 @@
 #include "http.h"
 #include "file.h"
 #include "http_header.h"
+#include "parse_args.h"
 
 #define HTTP_BUFFER_SIZE	2048
 
@@ -80,6 +81,9 @@ char *build_response(const char *path, size_t *buf_len){
 }
 
 void *read_http_request(void *arg){
+	int retval;
+	char *root;
+
 	printf("thread créé\n");
 	int client_socket;
 	if(arg == NULL){
@@ -93,6 +97,14 @@ void *read_http_request(void *arg){
 		return NULL;
 	}
 	bzero(buffer, HTTP_BUFFER_SIZE);
+
+	root = get_string_setting(SETTING_ROOT);
+	if(root != NULL && strcmp(root, "")){ // renvoie 0 si égaux : on entre dans la condition s'ils sont différents
+		retval = chdir(root);
+		if(retval < 0)
+			goto ret;
+	}
+
 	ssize_t bytes_read = recv(client_socket, buffer, HTTP_BUFFER_SIZE - 1, 0);
 	if(bytes_read < 0){
 		perror("Impossible de recevoir les données");
