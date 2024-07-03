@@ -14,6 +14,10 @@ struct server_settings settings[] = {
 
 uint8_t settings_flags = 0;
 
+void print_usage(){
+	printf("usage : [-v] [-r root] [port]");
+}
+
 int parse_args(int argc, char const* argv[]){
 	int optval = 0;
 	char *short_options = "r:v";
@@ -47,7 +51,8 @@ int parse_args(int argc, char const* argv[]){
 				break;
 
 			default:
-				break;
+				print_usage();
+				return EXIT_FAILURE; // TODO : créer une fonction qui free la variable settings
 		}
 
 	}
