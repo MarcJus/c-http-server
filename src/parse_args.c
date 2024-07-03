@@ -12,6 +12,8 @@ struct server_settings settings[] = {
 	{}
 };
 
+uint8_t settings_flags = 0;
+
 int parse_args(int argc, char const* argv[]){
 	int optval = 0;
 	char *short_options = "r:v";
@@ -38,6 +40,10 @@ int parse_args(int argc, char const* argv[]){
 				root_flag = 1;
 
 				settings[SETTING_ROOT].value = root;
+				break;
+
+			case 'v':
+				settings_flags |= FLAG_VERBOSE;
 				break;
 
 			default:
