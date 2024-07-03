@@ -15,6 +15,7 @@
 #include "http.h"
 #include "file.h"
 #include "http_header.h"
+#include "parse_args.h"
 
 #define HTTP_BUFFER_SIZE	2048
 
@@ -80,7 +81,10 @@ char *build_response(const char *path, size_t *buf_len){
 }
 
 void *read_http_request(void *arg){
-	printf("thread créé\n");
+	int retval;
+	char *root;
+
+	d("thread créé\n");
 	int client_socket;
 	if(arg == NULL){
 		return NULL;
@@ -93,6 +97,14 @@ void *read_http_request(void *arg){
 		return NULL;
 	}
 	bzero(buffer, HTTP_BUFFER_SIZE);
+
+	root = get_string_setting(SETTING_ROOT);
+	if(root != NULL && strcmp(root, "")){ // renvoie 0 si égaux : on entre dans la condition s'ils sont différents
+		retval = chdir(root);
+		if(retval < 0)
+			goto ret;
+	}
+
 	ssize_t bytes_read = recv(client_socket, buffer, HTTP_BUFFER_SIZE - 1, 0);
 	if(bytes_read < 0){
 		perror("Impossible de recevoir les données");
@@ -101,14 +113,14 @@ void *read_http_request(void *arg){
 		if(path == NULL){
 			goto ret;
 		}
-		printf("path : /%s\n", path);
+		d("path : /%s\n", path);
 		size_t buf_len;
 		char *response = build_response(path, &buf_len);
 		if(response == NULL){
 			free(path);
 			goto ret;
 		}
-		printf("taille : %ld\n", buf_len);
+		d("taille : %ld\n", buf_len);
 
 		ssize_t bytes_sent = send(client_socket, response, buf_len, 0);
 		if(bytes_sent < 0){
@@ -116,7 +128,7 @@ void *read_http_request(void *arg){
 			free(path);
 			goto ret;
 		}
-		printf("Envoyé : %ld\n", bytes_sent);
+		d("Envoyé : %ld\n", bytes_sent);
 		free(path);
 		free(response);
 	}
