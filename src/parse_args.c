@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "parse_args.h"
 
@@ -16,6 +18,26 @@ uint8_t settings_flags = 0;
 
 void print_usage(){
 	printf("usage : [-v] [-r root] [port]");
+}
+
+int is_root_valid(char *root){
+	int fd = open(root, O_RDONLY);
+	if(fd < 0)
+		return 0;
+
+	struct stat fd_stat;
+	if(fstat(fd, &fd_stat) < 0){
+		close(fd);
+		return 0;
+	}
+
+	if(!S_ISDIR(fd_stat.st_mode)){
+		close(fd);
+		return 0;
+	}
+
+	close(fd);
+	return 1;
 }
 
 int parse_args(int argc, char* const* argv){
@@ -33,6 +55,11 @@ int parse_args(int argc, char* const* argv){
 		switch(optval){
 			case 'r':
 				size_t root_len = strlen(optarg);
+				if(!is_root_valid(optarg)){
+					printf("Invalid root\n");
+					return EXIT_FAILURE;
+				}
+				
 				char *root = malloc(root_len) + 1; // +1 pour le \0
 				if(root == NULL){
 					return EXIT_FAILURE;
