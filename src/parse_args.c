@@ -60,7 +60,7 @@ int parse_args(int argc, char* const* argv){
 					return EXIT_FAILURE;
 				}
 				
-				char *root = malloc(root_len) + 1; // +1 pour le \0
+				char *root = malloc(root_len + 1); // +1 pour le \0
 				if(root == NULL){
 					return EXIT_FAILURE;
 				}
@@ -118,8 +118,10 @@ int parse_args(int argc, char* const* argv){
 void free_settings(){
 	int i = 0;
 	while (settings[i].name != NULL){
-		free(settings[i].value);
-		(&(settings[i]))->value = NULL;
+		if(settings[i].value != NULL){
+			free(settings[i].value);
+			(&(settings[i]))->value = NULL;
+		}
 		i++;
 	}
 }
