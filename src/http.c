@@ -91,6 +91,7 @@ void *read_http_request(void *arg){
 	}
 	client_socket = *(int*)arg;
 	free(arg);
+
 	char *buffer = malloc(HTTP_BUFFER_SIZE);
 	if(buffer == NULL){
 		close(client_socket);
@@ -114,6 +115,7 @@ void *read_http_request(void *arg){
 			goto ret;
 		}
 		d("path : /%s\n", path);
+
 		size_t buf_len;
 		char *response = build_response(path, &buf_len);
 		if(response == NULL){
@@ -128,6 +130,7 @@ void *read_http_request(void *arg){
 			free(path);
 			goto ret;
 		}
+		
 		d("Envoyé : %ld\n", bytes_sent);
 		free(path);
 		free(response);
