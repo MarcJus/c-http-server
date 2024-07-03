@@ -32,7 +32,7 @@ int parse_args(int argc, char const* argv[]){
 
 		switch(optval){
 			case 'r':
-				size_t root_len = strlen(optarg); 
+				size_t root_len = strlen(optarg);
 				char *root = malloc(root_len) + 1; // +1 pour le \0
 				if(root == NULL){
 					return EXIT_FAILURE;
@@ -65,6 +65,25 @@ int parse_args(int argc, char const* argv[]){
 		*root = '\0';
 		settings[SETTING_ROOT].value = root;
 	}
+
+	int *port = malloc(sizeof(int));
+	if(port == NULL){
+		return EXIT_FAILURE;
+	}
+
+	if((optind + 1) > argc) { // aucun argument : on met le port à 80 par défaut
+		*port = 80;
+	} else {
+		int value = atoi(argv[optind]);
+		if(value == 0){
+			print_usage();
+			free(port);
+			return EXIT_FAILURE;
+		}
+
+		*port = value;
+	}
+	settings[SETTING_PORT].value = port;
 
 	return 0;
 }
