@@ -6,7 +6,7 @@
 struct server_settings {
 	const char *name;
 
-	const void *value;
+	void *value;
 };
 
 // Options qui requièrent un argument
@@ -24,5 +24,7 @@ extern uint8_t settings_flags;
 
 
 int parse_args(int argc, char const* argv[]);
+
+void free_settings();
 
 #endif //_PARSE_ARGS_

@@ -52,7 +52,7 @@ int parse_args(int argc, char const* argv[]){
 
 			default:
 				print_usage();
-				return EXIT_FAILURE; // TODO : créer une fonction qui free la variable settings
+				return EXIT_FAILURE;
 		}
 
 	}
@@ -86,4 +86,14 @@ int parse_args(int argc, char const* argv[]){
 	settings[SETTING_PORT].value = port;
 
 	return 0;
+}
+
+void free_settings(){
+	int i = 0;
+	for(struct server_settings *setting = &(settings[i]); setting->name != NULL; i++){
+		if(setting->value != NULL){
+			free(setting->value);
+			setting->value = NULL;
+		}
+	}
 }
