@@ -54,6 +54,7 @@ int parse_args(int argc, char* const* argv){
 
 		switch(optval){
 			case 'r':
+			{
 				size_t root_len = strlen(optarg);
 				if(!is_root_valid(optarg)){
 					printf("Invalid root\n");
@@ -72,7 +73,7 @@ int parse_args(int argc, char* const* argv){
 
 				settings[SETTING_ROOT].value = root;
 				break;
-
+			}
 			case 'v':
 				settings_flags |= FLAG_VERBOSE;
 				break;
