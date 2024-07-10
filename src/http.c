@@ -141,3 +141,14 @@ ret:
 	free(buffer);
 	return NULL;
 }
+
+void free_http_response(struct http_response *response){
+	if(response->buffer){
+		free(response->buffer);
+		response->buffer = NULL;
+	}
+	if(response->file_name){
+		free(response->file_name);
+		response->file_name = NULL;
+	}
+}

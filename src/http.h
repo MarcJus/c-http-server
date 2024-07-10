@@ -21,7 +21,7 @@ struct http_response {
 
 };
 
-void free_http_response(struct http_response response);
+void free_http_response(struct http_response *response);
 
 void *read_http_request(void *client_socket);
 
