@@ -28,56 +28,64 @@
 								"\r\n"\
 								"Not Found\r\n"
 
-char *build_response(const char *path, size_t *buf_len){
+int build_response(struct http_response *http_response){
+	char *path = http_response->file_name;
+	size_t *buf_len = &(http_response->length);
 	char *response = NULL;
 
 	int file_fd = open_file(path);
+	http_response->fd = file_fd;
 	if(file_fd < 0){
 		perror("Impossible d'ouvrir le fichier");
 		response = malloc(sizeof(HTTP_404_RESPONSE) - 1);
 		if(response == NULL)
-			return NULL;
+			return EXIT_FAILURE;
 
 		memcpy(response, HTTP_404_RESPONSE, sizeof(HTTP_404_RESPONSE) - 1);
 		*buf_len = sizeof(HTTP_404_RESPONSE) - 1; // -1 pour enlever le \0 (il est en trop dans en http)
 
-		return response;
-	}
+		http_response->status_code = NOT_FOUND;
+	} else {
+		struct stat file_stat;
+		if(fstat(file_fd, &file_stat) < 0){
+			perror("Impossible de récupérer les statistiques");
+			close(file_fd);
+			http_response->status_code = INTERNAL_ERROR;
+		}
 
-	struct stat file_stat;
-	if(fstat(file_fd, &file_stat) < 0){
-		perror("Impossible de récupérer les statistiques");
+		off_t file_size = file_stat.st_size;
+		*buf_len = sizeof(HTTP_200_RESPONSE_BASE) + file_size;
+
+		response = malloc(*buf_len);
+		if(response == NULL){
+			*buf_len = 0;
+			close(file_fd);
+			http_response->status_code = INTERNAL_ERROR;
+			return EXIT_FAILURE; // TODO : Gérer les erreurs 503
+		}
+		bzero(response, *buf_len);
+
+		off_t bytes_copied = 0;
+		memcpy(response, HTTP_200_RESPONSE_BASE, sizeof(HTTP_200_RESPONSE_BASE) - 1);
+		bytes_copied += sizeof(HTTP_200_RESPONSE_BASE) - 1;
+
+		ssize_t bytes_read = read(file_fd, response + bytes_copied, file_size);
+		if(bytes_read < 0){
+			perror("Impossible de copier les données");
+			*buf_len = 0;
+			free(response);
+			response = NULL;
+			close(file_fd);
+			http_response->status_code = INTERNAL_ERROR;
+		}
+
+		http_response->status_code = OK;
+		response[*buf_len - 1] = '\n';
 		close(file_fd);
-		return NULL;
 	}
 
-	off_t file_size = file_stat.st_size;
-	*buf_len = sizeof(HTTP_200_RESPONSE_BASE) + file_size;
-
-	response = malloc(*buf_len);
-	if(response == NULL){
-		*buf_len = 0;
-		close(file_fd);
-		return NULL;
-	}
-	bzero(response, *buf_len);
-
-	off_t bytes_copied = 0;
-	memcpy(response, HTTP_200_RESPONSE_BASE, sizeof(HTTP_200_RESPONSE_BASE) - 1);
-	bytes_copied += sizeof(HTTP_200_RESPONSE_BASE) - 1;
-
-	ssize_t bytes_read = read(file_fd, response + bytes_copied, file_size);
-	if(bytes_read < 0){
-		perror("Impossible de copier les données");
-		free(response);
-		*buf_len = 0;
-		close(file_fd);
-		return NULL;
-	}
-
-	response[*buf_len - 1] = '\n';
-	close(file_fd);
-	return response;
+	http_response->buffer = response;
+	return EXIT_SUCCESS;
 }
 
 void *read_http_request(void *arg){
@@ -116,15 +124,16 @@ void *read_http_request(void *arg){
 		}
 		d("path : /%s\n", path);
 
-		size_t buf_len;
-		char *response = build_response(path, &buf_len);
-		if(response == NULL){
-			free(path);
+		struct http_response http_response = {
+			.file_name = path
+		};
+		if(build_response(&http_response) == EXIT_FAILURE){
+			free_http_response(&http_response);
 			goto ret;
 		}
-		d("taille : %ld\n", buf_len);
+		d("taille : %ld\n", http_response.length);
 
-		ssize_t bytes_sent = send(client_socket, response, buf_len, 0);
+		ssize_t bytes_sent = send(client_socket, http_response.buffer, http_response.length, 0);
 		if(bytes_sent < 0){
 			perror("Erreur lors de l'envoi de la réponse");
 			free(path);
@@ -132,8 +141,7 @@ void *read_http_request(void *arg){
 		}
 		
 		d("Envoyé : %ld\n", bytes_sent);
-		free(path);
-		free(response);
+		free_http_response(&http_response);
 	}
 
 ret:
