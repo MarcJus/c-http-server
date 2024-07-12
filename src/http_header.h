@@ -1,6 +1,8 @@
 #ifndef HTTP_HEADER_H
 #define HTTP_HEADER_H
 
+#include "http.h"
+
 /**
  * @brief Renvoie une chaine de caractère contenant la ressource demandée. Doit être libéré avec free()
  * 
@@ -9,5 +11,7 @@
  * @return Ressource demandée par le client
  */
 char *get_request_path(const char *request);
+
+int build_http_header(struct http_response *response);
 
 #endif // HTTP_HEADER_H

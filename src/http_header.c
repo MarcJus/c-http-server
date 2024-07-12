@@ -5,6 +5,14 @@
 
 #include "http_header.h"
 
+#define HTTP_200_RESPONSE_BASE 	"HTTP/1.1 200 OK\r\n"\
+								"\r\n"
+
+#define HTTP_404_RESPONSE		"HTTP/1.1 404 Not Found\r\n"\
+								"Content-Type: text/plain\r\n"\
+								"\r\n"\
+								"Not Found\r\n"
+
 char *get_request_path(const char *request){
 	char *path = NULL;
 	regex_t regex;
@@ -23,4 +31,9 @@ char *get_request_path(const char *request){
 	regfree(&regex);
 
 	return path;
+}
+
+int build_http_header(struct http_response *response){
+
+	return EXIT_SUCCESS;
 }
