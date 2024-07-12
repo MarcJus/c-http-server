@@ -5,13 +5,20 @@
 
 #include "http_header.h"
 
-#define HTTP_200_RESPONSE_BASE 	"HTTP/1.1 200 OK\r\n"\
-								"\r\n"
+#define STATUS_LINE_200_OK				"HTTP/1.1 200 OK\r\n"
 
-#define HTTP_404_RESPONSE		"HTTP/1.1 404 Not Found\r\n"\
-								"Content-Type: text/plain\r\n"\
-								"\r\n"\
-								"Not Found\r\n"
+#define STATUS_LINE_404_NOT_FOUND		"HTTP/1.1 404 Not Found\r\n"
+
+#define STATUS_LINE_INTERNAL_ERROR		"HTTP/1.1 503 Service Unavailable\r\n"
+
+
+#define HEADER_CONTENT_TYPE				"Content-Type"
+
+#define COONTENT_TYPE_HTML				"text/html"
+#define CONTENT_TYPE_PLAIN				"text/plain"
+#define CONTENT_TYPE_CSS				"text/css"
+#define CONTENT_TYPE_JS					"text/javascript"
+#define CONTENT_TYPE_JSON				"application/json"
 
 char *get_request_path(const char *request){
 	char *path = NULL;
