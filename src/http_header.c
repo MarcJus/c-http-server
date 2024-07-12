@@ -41,6 +41,30 @@ char *get_request_path(const char *request){
 }
 
 int build_http_header(struct http_response *response){
+	switch(response->status_code){
+		case OK:
+		{
+			if(response->buffer != NULL) // le buffer ne doit pas déjà être initialisé
+				return EXIT_FAILURE;
+
+			size_t header_length = strlen(STATUS_LINE_200_OK);
+			response->buffer = malloc(header_length);
+			if(!response->buffer)
+				return EXIT_FAILURE;
+
+			memcpy(response->buffer, STATUS_LINE_200_OK, header_length);
+
+			break;
+		}
+		case NOT_FOUND:
+			break;
+
+		case INTERNAL_ERROR:
+			break;
+
+		default:
+			break;
+	}
 
 	return EXIT_SUCCESS;
 }

@@ -12,6 +12,12 @@
  */
 char *get_request_path(const char *request);
 
+/**
+ * @brief Crée le header au début du buffer. `response->buffer` sera initialisé : il doit être nul
+ * 
+ * @param response Structure de la réponse.
+ * @return EXIT_SUCCESS en cas de succès, EXIT_FAILURE en cas d'erreur
+ */
 int build_http_header(struct http_response *response);
 
 #endif // HTTP_HEADER_H
