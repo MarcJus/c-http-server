@@ -20,6 +20,10 @@
 #define CONTENT_TYPE_JS					"text/javascript"
 #define CONTENT_TYPE_JSON				"application/json"
 
+enum header_field {
+	HEADER_FIELD_CONTENT_TYPE
+};
+
 char *get_request_path(const char *request){
 	char *path = NULL;
 	regex_t regex;
@@ -38,6 +42,10 @@ char *get_request_path(const char *request){
 	regfree(&regex);
 
 	return path;
+}
+
+int add_header(){
+
 }
 
 int build_http_header(struct http_response *response){
