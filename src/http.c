@@ -19,33 +19,43 @@
 
 #define HTTP_BUFFER_SIZE	2048
 
-#define HTTP_200_RESPONSE_BASE 	"HTTP/1.1 200 OK\r\n"\
-							   	"Content-Type: text/html\r\n"\
-							   	"\r\n"
-
-#define HTTP_404_RESPONSE		"HTTP/1.1 404 Not Found\r\n"\
-								"Content-Type: text/plain\r\n"\
-								"\r\n"\
-								"Not Found\r\n"
-
+/**
+ * @brief Crée le buffer qui contient la réponse HTTP. N'envoie pas la réponse !
+ * TODO : 1) Ouvre le fichier et met http_response->status_code en conséquence (OK en cas de succès, NOT_FOUND si non trouvé, INTERNAL ERROR sinon)
+ * TODO : 2) Appelle build_http_response() qui initialisera le buffer et crée le header selon le code d'erreur
+ * TODO : 3) Si le fichier est ouvert, copie le fichier dans le buffer
+ * 
+ * @param http_response 
+ * @return int EXIT_SUCCESS ou EXIT_FAILURE
+ */
 int build_response(struct http_response *http_response){
 	char *path = http_response->file_name;
 	size_t *buf_len = &(http_response->length);
 	char *response = NULL;
 
+	// 1)
 	int file_fd = open_file(path);
 	http_response->fd = file_fd;
-	if(file_fd < 0){
+	if(file_fd < 0){ // erreur d'ouverture
 		perror("Impossible d'ouvrir le fichier");
-		response = malloc(sizeof(HTTP_404_RESPONSE) - 1);
-		if(response == NULL)
-			return EXIT_FAILURE;
+		if(errno == ENOENT){
+			http_response->status_code = NOT_FOUND;
+		} else {
+			http_response->status_code = INTERNAL_ERROR;
+		}
+		// 2)
+		if(build_http_header(http_response) == EXIT_FAILURE){ // Erreur création header
+			return EXIT_FAILURE; // TODO : mieux gérer ces erreurs
+		}
 
-		memcpy(response, HTTP_404_RESPONSE, sizeof(HTTP_404_RESPONSE) - 1);
-		*buf_len = sizeof(HTTP_404_RESPONSE) - 1; // -1 pour enlever le \0 (il est en trop dans en http)
+	} else { // aucune erreur
+		http_response->status_code = OK;
+		// 2)
+		if(build_http_header(http_response) == EXIT_FAILURE){ // Erreur création header
+			return EXIT_FAILURE; // TODO : mieux gérer ces erreurs
+		}
 
-		http_response->status_code = NOT_FOUND;
-	} else {
+		// 3)
 		struct stat file_stat;
 		if(fstat(file_fd, &file_stat) < 0){
 			perror("Impossible de récupérer les statistiques");
@@ -54,20 +64,16 @@ int build_response(struct http_response *http_response){
 		}
 
 		off_t file_size = file_stat.st_size;
-		*buf_len = sizeof(HTTP_200_RESPONSE_BASE) + file_size;
+		size_t bytes_copied = *buf_len; // sauvegarde pour savoir ou commencer la copie
+		*buf_len += file_size + 1; // +1 pour le \n
 
-		response = malloc(*buf_len);
+		*response = realloc(http_response->buffer, *buf_len);
 		if(response == NULL){
 			*buf_len = 0;
 			close(file_fd);
 			http_response->status_code = INTERNAL_ERROR;
-			return EXIT_FAILURE; // TODO : Gérer les erreurs 503
+			return EXIT_FAILURE; // TODO : Mieux gérer ces erreurs
 		}
-		bzero(response, *buf_len);
-
-		off_t bytes_copied = 0;
-		memcpy(response, HTTP_200_RESPONSE_BASE, sizeof(HTTP_200_RESPONSE_BASE) - 1);
-		bytes_copied += sizeof(HTTP_200_RESPONSE_BASE) - 1;
 
 		ssize_t bytes_read = read(file_fd, response + bytes_copied, file_size);
 		if(bytes_read < 0){
@@ -79,12 +85,11 @@ int build_response(struct http_response *http_response){
 			http_response->status_code = INTERNAL_ERROR;
 		}
 
-		http_response->status_code = OK;
 		response[*buf_len - 1] = '\n';
 		close(file_fd);
+		http_response->buffer = response;
 	}
 
-	http_response->buffer = response;
 	return EXIT_SUCCESS;
 }
 
