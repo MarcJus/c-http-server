@@ -1,3 +1,7 @@
 *.o
 server
 *.html
+*.css
+*.js
+.test
+.vscode

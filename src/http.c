@@ -15,6 +15,7 @@
 #include "http.h"
 #include "file.h"
 #include "http_header.h"
+#include "parse_args.h"
 
 #define HTTP_BUFFER_SIZE	2048
 
@@ -33,7 +34,14 @@ char *build_response(const char *path, size_t *buf_len){
 	int file_fd = open_file(path);
 	if(file_fd < 0){
 		perror("Impossible d'ouvrir le fichier");
-		return NULL;
+		response = malloc(sizeof(HTTP_404_RESPONSE) - 1);
+		if(response == NULL)
+			return NULL;
+
+		memcpy(response, HTTP_404_RESPONSE, sizeof(HTTP_404_RESPONSE) - 1);
+		*buf_len = sizeof(HTTP_404_RESPONSE) - 1; // -1 pour enlever le \0 (il est en trop dans en http)
+
+		return response;
 	}
 
 	struct stat file_stat;
@@ -72,41 +80,64 @@ char *build_response(const char *path, size_t *buf_len){
 	return response;
 }
 
-int read_http_request(int client_socket){
+void *read_http_request(void *arg){
+	int retval;
+	char *root;
+
+	d("thread créé\n");
+	int client_socket;
+	if(arg == NULL){
+		return NULL;
+	}
+	client_socket = *(int*)arg;
+	free(arg);
+
 	char *buffer = malloc(HTTP_BUFFER_SIZE);
 	if(buffer == NULL){
-		return -1;
+		close(client_socket);
+		return NULL;
 	}
 	bzero(buffer, HTTP_BUFFER_SIZE);
+
+	root = get_string_setting(SETTING_ROOT);
+	if(root != NULL && strcmp(root, "")){ // renvoie 0 si égaux : on entre dans la condition s'ils sont différents
+		retval = chdir(root);
+		if(retval < 0)
+			goto ret;
+	}
+
 	ssize_t bytes_read = recv(client_socket, buffer, HTTP_BUFFER_SIZE - 1, 0);
 	if(bytes_read < 0){
 		perror("Impossible de recevoir les données");
 	} else if(bytes_read > 0) {
 		char *path = get_request_path(buffer);
 		if(path == NULL){
-			return -1;
+			goto ret;
 		}
+		d("path : /%s\n", path);
+
 		size_t buf_len;
 		char *response = build_response(path, &buf_len);
 		if(response == NULL){
 			free(path);
-			return -1;
+			goto ret;
 		}
-		printf("taille : %ld\n", buf_len);
-		printf("%s\n", response);
+		d("taille : %ld\n", buf_len);
 
 		ssize_t bytes_sent = send(client_socket, response, buf_len, 0);
 		if(bytes_sent < 0){
 			perror("Erreur lors de l'envoi de la réponse");
 			free(path);
-			free(response);
-			return -1;
+			goto ret;
 		}
-		printf("Envoyé : %ld\n", bytes_sent);
+		
+		d("Envoyé : %ld\n", bytes_sent);
 		free(path);
 		free(response);
 	}
 
+ret:
+	close(client_socket);
 	free(buffer);
-	return bytes_read;
+	return NULL;
 }
