@@ -13,7 +13,8 @@
 char *get_request_path(const char *request);
 
 /**
- * @brief Crée le header au début du buffer. `response->buffer` sera initialisé : il doit être nul
+ * @brief Crée le header au début du buffer. `response->buffer` sera initialisé : il doit être nul.
+ * response->length sera modifié aussi
  * 
  * @param response Structure de la réponse.
  * @return EXIT_SUCCESS en cas de succès, EXIT_FAILURE en cas d'erreur
