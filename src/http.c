@@ -102,7 +102,9 @@ void *read_http_request(void *arg){
 		return NULL;
 	}
 	bzero(buffer, HTTP_BUFFER_SIZE);
+	#ifdef __linux__
 	unshare(CLONE_FS);
+	#endif
 
 	root = get_string_setting(SETTING_ROOT);
 	if(root != NULL && strcmp(root, "")){ // renvoie 0 si égaux : on entre dans la condition s'ils sont différents
