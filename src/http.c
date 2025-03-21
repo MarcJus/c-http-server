@@ -4,9 +4,12 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <limits.h>
+
 #ifdef __linux__
 #include <linux/limits.h>
+#include <sched.h>
 #endif
+
 #include <regex.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -98,6 +101,7 @@ void *read_http_request(void *arg){
 		return NULL;
 	}
 	bzero(buffer, HTTP_BUFFER_SIZE);
+	unshare(CLONE_FS);
 
 	root = get_string_setting(SETTING_ROOT);
 	if(root != NULL && strcmp(root, "")){ // renvoie 0 si égaux : on entre dans la condition s'ils sont différents
