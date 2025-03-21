@@ -1,14 +1,15 @@
+#ifdef __linux__
+#define _GNU_SOURCE
+#include <linux/limits.h>
+#include <sched.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <limits.h>
-
-#ifdef __linux__
-#include <linux/limits.h>
-#include <sched.h>
-#endif
 
 #include <regex.h>
 #include <fcntl.h>
