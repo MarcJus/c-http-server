@@ -48,7 +48,7 @@ int accept_connection(int server_socket){
 		return client_socket;
 	}
 
-	printf("Nouvelle connexion : %s\n", inet_ntoa(client_addr.sin_addr));
+	printf("Nouvelle connexion : %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
 	pthread_t thread;
 	int *p_client_socket = malloc(sizeof(int));
@@ -62,5 +62,6 @@ int accept_connection(int server_socket){
 		printf("Impossible de créer un thread pour le client %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 		return ret;
 	}
+	pthread_detach(thread);
 	return 0;
 }
