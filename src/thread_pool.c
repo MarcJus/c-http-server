@@ -21,7 +21,7 @@ int create_thread_pool(){
 	return 0;
 }
 
-int add_new_client(int sock){
+void add_new_client(int sock){
 	pthread_mutex_lock(&pool_mutex);
 	client_socket = sock;
 	pthread_cond_signal(&pool_cond);

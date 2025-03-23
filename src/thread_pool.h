@@ -2,7 +2,7 @@
 #define __THREAD_POOL_H__
 
 int create_thread_pool();
-int add_new_client(int client_socket);
+void add_new_client(int client_socket);
 
 /**
  * @brief Permet d'obtenir la valeur du client socket
