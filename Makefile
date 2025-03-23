@@ -1,4 +1,4 @@
-OBJS = main.o server.o http.o file.o http_header.o parse_args.o
+OBJS = main.o server.o http.o file.o http_header.o parse_args.o thread_pool.o
 UNAME := $(shell uname)
 CFLAGS = -g 
 
