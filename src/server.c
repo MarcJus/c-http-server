@@ -8,6 +8,7 @@
 
 #include "server.h"
 #include "http.h"
+#include "thread_pool.h"
 
 int create_server(int port){
 
@@ -34,6 +35,9 @@ int create_server(int port){
 	
 	ret = listen(server_socket, 1);
 
+	if(create_thread_pool() < 0)
+		return -1;
+	
 	return server_socket;
 }
 
@@ -50,18 +54,6 @@ int accept_connection(int server_socket){
 
 	printf("Nouvelle connexion : %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
-	pthread_t thread;
-	int *p_client_socket = malloc(sizeof(int));
-	*p_client_socket = client_socket;
-	if(p_client_socket == NULL){
-		fprintf(stderr, "Une erreur de mémoire est survenue\n");
-		return -1;
-	}
-	ret = pthread_create(&thread, NULL, read_http_request, (void*)p_client_socket);
-	if(ret < 0){
-		printf("Impossible de créer un thread pour le client %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-		return ret;
-	}
-	pthread_detach(thread);
+	add_new_client(client_socket);
 	return 0;
 }

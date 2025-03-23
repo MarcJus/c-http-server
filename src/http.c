@@ -20,6 +20,7 @@
 #include "file.h"
 #include "http_header.h"
 #include "parse_args.h"
+#include "thread_pool.h"
 
 #define HTTP_BUFFER_SIZE	2048
 
@@ -90,11 +91,7 @@ void *read_http_request(void *arg){
 
 	d("thread créé\n");
 	int client_socket;
-	if(arg == NULL){
-		return NULL;
-	}
-	client_socket = *(int*)arg;
-	free(arg);
+	while((client_socket = get_client()) == 0); // ne continue pas tant que le socket n'est pas un vrai socket
 
 	char *buffer = malloc(HTTP_BUFFER_SIZE);
 	if(buffer == NULL){
