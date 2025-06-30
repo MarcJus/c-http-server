@@ -20,6 +20,7 @@
 #include "file.h"
 #include "http_header.h"
 #include "parse_args.h"
+#include "thread_pool.h"
 
 #define HTTP_BUFFER_SIZE	2048
 
@@ -89,16 +90,9 @@ void *read_http_request(void *arg){
 	char *root;
 
 	d("thread créé\n");
-	int client_socket;
-	if(arg == NULL){
-		return NULL;
-	}
-	client_socket = *(int*)arg;
-	free(arg);
 
 	char *buffer = malloc(HTTP_BUFFER_SIZE);
 	if(buffer == NULL){
-		close(client_socket);
 		return NULL;
 	}
 	bzero(buffer, HTTP_BUFFER_SIZE);
@@ -109,42 +103,52 @@ void *read_http_request(void *arg){
 	root = get_string_setting(SETTING_ROOT);
 	if(root != NULL && strcmp(root, "")){ // renvoie 0 si égaux : on entre dans la condition s'ils sont différents
 		retval = chdir(root);
-		if(retval < 0)
-			goto ret;
+		if(retval < 0){
+			perror("Erreur chdir");
+			return NULL;
+		}
 	}
 
-	ssize_t bytes_read = recv(client_socket, buffer, HTTP_BUFFER_SIZE - 1, 0);
-	if(bytes_read < 0){
-		perror("Impossible de recevoir les données");
-	} else if(bytes_read > 0) {
-		char *path = get_request_path(buffer);
-		if(path == NULL){
-			goto ret;
-		}
-		d("path : /%s\n", path);
+	int client_socket;
+	while(1){
+		client_socket = get_client();
+		if(client_socket == 0) // pas le bon thread
+			continue;
 
-		size_t buf_len;
-		char *response = build_response(path, &buf_len);
-		if(response == NULL){
-			free(path);
-			goto ret;
-		}
-		d("taille : %ld\n", buf_len);
+		ssize_t bytes_read = recv(client_socket, buffer, HTTP_BUFFER_SIZE - 1, 0);
+		if(bytes_read < 0){
+			perror("Impossible de recevoir les données");
+		} else if(bytes_read > 0) {
+			char *path = get_request_path(buffer);
+			if(path == NULL){
+				printf("Erreur get_request_path\n");
+				close(client_socket);
+				continue;
+			}
+			d("path : /%s\n", path);
 
-		ssize_t bytes_sent = send(client_socket, response, buf_len, 0);
-		if(bytes_sent < 0){
-			perror("Erreur lors de l'envoi de la réponse");
+			size_t buf_len;
+			char *response = build_response(path, &buf_len);
+			if(response == NULL){
+				free(path);
+				close(client_socket);
+			}
+			d("taille : %ld\n", buf_len);
+
+			ssize_t bytes_sent = send(client_socket, response, buf_len, 0);
+			if(bytes_sent < 0){
+				perror("Erreur lors de l'envoi de la réponse");
+				free(path);
+				close(client_socket);
+			}
+			
+			d("Envoyé : %ld\n", bytes_sent);
 			free(path);
-			goto ret;
+			free(response);
 		}
-		
-		d("Envoyé : %ld\n", bytes_sent);
-		free(path);
-		free(response);
+		close(client_socket);
+		bzero(buffer, HTTP_BUFFER_SIZE); // vide le buffer pour le prochain client
 	}
 
-ret:
-	close(client_socket);
-	free(buffer);
 	return NULL;
 }
